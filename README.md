@@ -25,19 +25,30 @@
 
 #### Page Object Pattern
 Проект организован с использованием паттерна Page Object:
-locators/ # Локаторы элементов страниц
-├── auth_locators.py # Локаторы для страниц авторизации
-├── feed_page_locators.py # Локаторы для ленты заказов
-└── main_page_locators.py # Локаторы для главной страницы
-
-pages/ # Классы страниц
-├── base_page.py # Базовый класс с общими методами
-├── feed_page.py # Работа с лентой заказов
-└── main_page.py # Работа с конструктором бургеров
-
-tests/ # Тестовые сценарии
-├── test_feed_functionality.py # Тесты ленты заказов
-└── test_main_functionality.py # Тесты основной функциональности
+│   .gitignore
+│   conftest.py
+│   pytest.ini
+│   README.md
+│   requirements.txt
+│   urls.py
+│   
+├───allure-results
+├───locators
+│       auth_locators.py
+│       feed_page_locators.py
+│       main_page_locators.py
+│       __init__.py
+│       
+├───pages
+│       base_page.py
+│       feed_page.py
+│       main_page.py
+│       __init__.py
+│       
+└───tests
+        test_feed_functionality.py
+        test_main_functionality.py
+        __init__.py
 
 #### Фикстуры для тестовых данных:
 - `generate_test_user` - генерация уникальных тестовых данных пользователя

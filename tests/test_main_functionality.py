@@ -1,8 +1,8 @@
 import pytest
 import allure
-from selenium.webdriver.support.ui import WebDriverWait
 from pages.main_page import MainPage
 from locators.main_page_locators import MainPageLocators
+from urls import FEED_URL
 
 
 
@@ -14,7 +14,7 @@ class TestMainFunctionality:
         page = MainPage(browser)
         
         with allure.step("Открыть страницу ленты заказов"):
-            browser.get(MainPageLocators.FEED_URL)
+            browser.get(FEED_URL)
         
         with allure.step("Проверить наличие кнопки 'Конструктор'"):
             assert page.is_element_displayed(MainPageLocators.CONSTRUCTOR_BUTTON)
@@ -73,53 +73,51 @@ class TestMainFunctionality:
     
     @allure.title("5.1 Увеличение счётчика булки при добавлении в заказ")
     def test_main_bun_counter_increases(self, browser, auth_user):
-        """Проверка счетчика для булки"""
         main_page = MainPage(browser)
         
         with allure.step("1. Открыть главную страницу"):
             main_page.open()
         
         with allure.step("2. Запомнить начальное значение счетчика у булки"):
-            initial_counter = main_page.get_counter_value(MainPageLocators.FIRST_BUN_COUNTER)
+            initial_counter = main_page.get_first_bun_counter_value()
         
         with allure.step("3. Перетащить булку в конструктор"):
-            main_page.drag_ingredient_to_constructor(MainPageLocators.FIRST_BUN)
-            
-            WebDriverWait(browser, 3).until(
-                lambda driver: main_page.get_counter_value(MainPageLocators.FIRST_BUN_COUNTER) != initial_counter
-            )
+            main_page.drag_first_bun()
+            main_page.wait_for_first_bun_counter_change(initial_counter)
         
         with allure.step("4. Проверить, что счётчик увеличился в 2 раза"):
-            final_counter = main_page.get_counter_value(MainPageLocators.FIRST_BUN_COUNTER)
+            final_counter = main_page.get_first_bun_counter_value()
             
             assert final_counter == initial_counter + 2, \
                 f"Счетчик булки не увеличился в 2 раза. Было: {initial_counter}, стало: {final_counter}"
     
     @allure.title("5.2 Счетчик соусов и начинок увеличивается на 1")
-    @pytest.mark.parametrize("ingredient_name, ingredient_locator, counter_locator", [
-        ("соус", MainPageLocators.FIRST_SAUCE, MainPageLocators.FIRST_SAUCE_COUNTER),
-        ("начинка", MainPageLocators.FIRST_FILLING, MainPageLocators.FIRST_FILLING_COUNTER),
+    @pytest.mark.parametrize("ingredient_name, drag_method, get_counter_method, wait_method", [
+        ("соус", "drag_first_sauce", "get_first_sauce_counter_value", "wait_for_first_sauce_counter_change"),
+        ("начинка", "drag_first_filling", "get_first_filling_counter_value", "wait_for_first_filling_counter_change"),
     ])
     def test_main_sauce_and_filling_counter_increases(self, browser, auth_user, 
-                                                     ingredient_name, ingredient_locator, counter_locator):
-        """Проверка счетчиков для соусов и начинок"""
+                                                     ingredient_name, drag_method, get_counter_method, wait_method):
         main_page = MainPage(browser)
         
         with allure.step("1. Открыть главную страницу"):
             main_page.open()
         
         with allure.step(f"2. Запомнить начальное значение счетчика у {ingredient_name}"):
-            initial_counter = main_page.get_counter_value(counter_locator)
+            get_counter = getattr(main_page, get_counter_method)
+            initial_counter = get_counter()
         
         with allure.step(f"3. Перетащить {ingredient_name} в конструктор"):
-            main_page.drag_ingredient_to_constructor(ingredient_locator)
+            drag_method_func = getattr(main_page, drag_method)
+            drag_method_func()
             
-            WebDriverWait(browser, 3).until(
-                lambda driver: main_page.get_counter_value(counter_locator) != initial_counter
-            )
+            wait_method_func = getattr(main_page, wait_method)
+            wait_method_func(initial_counter)
         
         with allure.step(f"4. Проверить, что счётчик {ingredient_name} увеличился на 1"):
-            final_counter = main_page.get_counter_value(counter_locator)
+            final_counter = get_counter()
             
             assert final_counter == initial_counter + 1, \
                 f"Счетчик {ingredient_name} не увеличился на 1. Было: {initial_counter}, стало: {final_counter}"
+            
+            

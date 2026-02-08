@@ -1,13 +1,15 @@
 import allure
 import time
-from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.common.action_chains import ActionChains
 from .base_page import BasePage
 from locators.main_page_locators import MainPageLocators
+from urls import CONSTRUCTOR_URL, FEED_URL
 
 class MainPage(BasePage):
     def __init__(self, browser):
-        super().__init__(browser, MainPageLocators.CONSTRUCTOR_URL)
+        super().__init__(browser, CONSTRUCTOR_URL)
     
     @allure.step("Кликнуть на 'Конструктор'")
     def click_constructor(self):
@@ -41,10 +43,10 @@ class MainPage(BasePage):
             return False
     
     def is_on_main_page(self):
-        return self.get_current_url() == MainPageLocators.CONSTRUCTOR_URL
+        return self.get_current_url() == CONSTRUCTOR_URL
     
     def is_on_feed_page(self):
-        return self.get_current_url() == MainPageLocators.FEED_URL
+        return self.get_current_url() == FEED_URL
     
     @allure.step("Перетащить конкретный ингредиент в конструктор")
     def drag_ingredient_to_constructor(self, ingredient_locator):
@@ -52,9 +54,80 @@ class MainPage(BasePage):
             ingredient_locator,
             MainPageLocators.CONSTRUCTOR_AREA
         )
-        time.sleep(0.5)
+        WebDriverWait(self.browser, 3).until(
+            lambda driver: driver.find_element(*MainPageLocators.CONSTRUCTOR_AREA).is_displayed()
+        ) 
     
     @allure.step("Получить значение счетчика")
     def get_counter_value(self, counter_locator):
         element = self.find_element(counter_locator, timeout=2)
         return int(element.text.strip())
+    
+    @allure.step("Получить номер заказа из модального окна")
+    def get_order_number(self, timeout=15):
+        self.wait_for_visibility(MainPageLocators.MODAL_CONTAINER, timeout=timeout)
+        
+        order_number_locator = MainPageLocators.ORDER_NUMBER
+        
+        WebDriverWait(self.browser, timeout).until(
+            lambda driver: driver.find_element(*order_number_locator).text.strip() != "9999"
+        )
+        
+        order_number_element = self.find_element(order_number_locator)
+        return order_number_element.text.strip()
+    
+    @allure.step("Ожидать изменения счетчика")
+    def wait_for_counter_change(self, counter_locator, initial_value, timeout=3):
+        WebDriverWait(self.browser, timeout).until(
+            lambda driver: self.get_counter_value(counter_locator) != initial_value
+        )
+    
+    @allure.step("Нажать кнопку 'Оформить заказ'")
+    def click_order_button(self):
+        self.click(MainPageLocators.ORDER_BUTTON)
+    
+    @allure.step("Дождаться видимости номера заказа")
+    def wait_for_order_number_visible(self):
+        self.wait_for_visibility(MainPageLocators.ORDER_NUMBER)
+    
+    @allure.step("Дождаться исчезновения модального окна")
+    def wait_for_modal_invisible(self):
+        self.wait_for_invisibility(MainPageLocators.MODAL_CONTAINER)
+    
+    @allure.step("Перетащить первую булку в конструктор")
+    def drag_first_bun(self):
+        self.drag_ingredient_to_constructor(MainPageLocators.FIRST_BUN)
+    
+    @allure.step("Перетащить первый соус в конструктор")
+    def drag_first_sauce(self):
+        self.drag_ingredient_to_constructor(MainPageLocators.FIRST_SAUCE)
+    
+    @allure.step("Перетащить первую начинку в конструктор")
+    def drag_first_filling(self):
+        self.drag_ingredient_to_constructor(MainPageLocators.FIRST_FILLING)
+    
+    @allure.step("Получить значение счетчика первой булки")
+    def get_first_bun_counter_value(self):
+        return self.get_counter_value(MainPageLocators.FIRST_BUN_COUNTER)
+    
+    @allure.step("Получить значение счетчика первого соуса")
+    def get_first_sauce_counter_value(self):
+        return self.get_counter_value(MainPageLocators.FIRST_SAUCE_COUNTER)
+    
+    @allure.step("Получить значение счетчика первой начинки")
+    def get_first_filling_counter_value(self):
+        return self.get_counter_value(MainPageLocators.FIRST_FILLING_COUNTER)
+    
+    @allure.step("Ожидать изменения счетчика первой булки")
+    def wait_for_first_bun_counter_change(self, initial_value, timeout=3):
+        self.wait_for_counter_change(MainPageLocators.FIRST_BUN_COUNTER, initial_value, timeout)
+    
+    @allure.step("Ожидать изменения счетчика первого соуса")
+    def wait_for_first_sauce_counter_change(self, initial_value, timeout=3):
+        self.wait_for_counter_change(MainPageLocators.FIRST_SAUCE_COUNTER, initial_value, timeout)
+    
+    @allure.step("Ожидать изменения счетчика первой начинки")
+    def wait_for_first_filling_counter_change(self, initial_value, timeout=3):
+        self.wait_for_counter_change(MainPageLocators.FIRST_FILLING_COUNTER, initial_value, timeout)
+
+        

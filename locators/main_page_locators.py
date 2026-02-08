@@ -2,8 +2,7 @@ from selenium.webdriver.common.by import By
 
 class MainPageLocators:
     
-    CONSTRUCTOR_URL = "https://stellarburgers.education-services.ru/"
-    FEED_URL = "https://stellarburgers.education-services.ru/feed"
+
     
     CONSTRUCTOR_BUTTON = (By.XPATH, "//a[.//p[text()='Конструктор']]")
     FEED_BUTTON = (By.XPATH, "//a[.//p[text()='Лента Заказов']]")
@@ -25,3 +24,5 @@ class MainPageLocators:
     MODAL_CONTAINER = (By.XPATH, "//div[contains(@class, 'Modal_modal__container')]")
     MODAL_CLOSE_BUTTON = (By.XPATH, "//button[contains(@class, 'Modal_modal__close')]")
     ORDER_NUMBER = (By.XPATH, "//div[contains(@class, 'Modal_modal__container')]//h2[contains(@class, 'Modal_modal__title')]")
+
+    
