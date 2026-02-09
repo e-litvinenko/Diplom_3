@@ -1,8 +1,5 @@
 import allure
-import time
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import TimeoutException
-from selenium.webdriver.common.action_chains import ActionChains
 from .base_page import BasePage
 from locators.main_page_locators import MainPageLocators
 from urls import CONSTRUCTOR_URL, FEED_URL
@@ -54,7 +51,7 @@ class MainPage(BasePage):
             ingredient_locator,
             MainPageLocators.CONSTRUCTOR_AREA
         )
-        WebDriverWait(self.browser, 3).until(
+        self._wait(
             lambda driver: driver.find_element(*MainPageLocators.CONSTRUCTOR_AREA).is_displayed()
         ) 
     
@@ -69,7 +66,7 @@ class MainPage(BasePage):
         
         order_number_locator = MainPageLocators.ORDER_NUMBER
         
-        WebDriverWait(self.browser, timeout).until(
+        self._wait(
             lambda driver: driver.find_element(*order_number_locator).text.strip() != "9999"
         )
         
@@ -78,7 +75,7 @@ class MainPage(BasePage):
     
     @allure.step("Ожидать изменения счетчика")
     def wait_for_counter_change(self, counter_locator, initial_value, timeout=3):
-        WebDriverWait(self.browser, timeout).until(
+        self._wait(
             lambda driver: self.get_counter_value(counter_locator) != initial_value
         )
     
@@ -130,4 +127,10 @@ class MainPage(BasePage):
     def wait_for_first_filling_counter_change(self, initial_value, timeout=3):
         self.wait_for_counter_change(MainPageLocators.FIRST_FILLING_COUNTER, initial_value, timeout)
 
-        
+    @allure.step("Проверить видимость кнопки 'Конструктор'")
+    def is_constructor_button_displayed(self):
+        return self.is_element_displayed(MainPageLocators.CONSTRUCTOR_BUTTON)
+
+    @allure.step("Проверить видимость кнопки 'Лента Заказов'")
+    def is_feed_button_displayed(self):
+        return self.is_element_displayed(MainPageLocators.FEED_BUTTON)

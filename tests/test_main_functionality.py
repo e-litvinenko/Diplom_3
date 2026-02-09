@@ -1,7 +1,6 @@
 import pytest
 import allure
 from pages.main_page import MainPage
-from locators.main_page_locators import MainPageLocators
 from urls import FEED_URL
 
 
@@ -17,7 +16,7 @@ class TestMainFunctionality:
             browser.get(FEED_URL)
         
         with allure.step("Проверить наличие кнопки 'Конструктор'"):
-            assert page.is_element_displayed(MainPageLocators.CONSTRUCTOR_BUTTON)
+            assert page.is_constructor_button_displayed()
         
         with allure.step("Кликнуть на кнопку 'Конструктор'"):
             page.click_constructor()
@@ -33,7 +32,7 @@ class TestMainFunctionality:
             page.open()
         
         with allure.step("Проверить наличие кнопки 'Лента Заказов'"):
-            assert page.is_element_displayed(MainPageLocators.FEED_BUTTON)
+            assert page.is_feed_button_displayed()
         
         with allure.step("Кликнуть на кнопку 'Лента Заказов'"):
             page.click_feed()

@@ -2,11 +2,8 @@ import pytest
 import random
 import string
 from selenium import webdriver
-from locators.auth_locators import AuthLocators
-from locators.main_page_locators import MainPageLocators
-from pages.base_page import BasePage
+from pages.auth_page import AuthPage 
 from urls import REGISTER_URL, LOGIN_URL, CONSTRUCTOR_URL
-
 
 @pytest.fixture(scope="function", params=['chrome', 'firefox'])
 def browser(request):
@@ -34,19 +31,16 @@ def generate_test_user():
 def registered_user(browser, generate_test_user):
     user = generate_test_user
     
-    base_page = BasePage(browser, REGISTER_URL)
-    base_page.open()
+    auth_page = AuthPage(browser, REGISTER_URL)
+    auth_page.open()
+    auth_page.wait_for_form()
     
-    base_page.wait_for_presence(AuthLocators.FORM_INPUTS)
+    auth_page.fill_name(user['name'])
+    auth_page.fill_email(user['email'])  
+    auth_page.fill_password(user['password'])
+    auth_page.click_register()
     
-    base_page.find_element(AuthLocators.NAME_INPUT).send_keys(user['name'])
-    base_page.find_element(AuthLocators.EMAIL_INPUT).send_keys(user['email'])
-    base_page.find_element(AuthLocators.PASSWORD_INPUT).send_keys(user['password'])
-    
-    register_button = base_page.find_element(AuthLocators.REGISTER_BUTTON)
-    base_page.safe_click(register_button)
-    
-    base_page.wait_for_url(LOGIN_URL)
+    auth_page.wait_for_url(LOGIN_URL)
     
     return user
 
@@ -54,21 +48,16 @@ def registered_user(browser, generate_test_user):
 def auth_user(browser, registered_user):
     user = registered_user
     
-    base_page = BasePage(browser, LOGIN_URL)
-    base_page.open()
+    auth_page = AuthPage(browser, LOGIN_URL)
+    auth_page.open()
+    auth_page.wait_for_form()
     
-    base_page.wait_for_presence(AuthLocators.FORM_INPUTS)
+    auth_page.fill_email(user['email'])
+    auth_page.fill_password(user['password'])
+    auth_page.click_login()
     
-    base_page.find_element(AuthLocators.EMAIL_INPUT).send_keys(user['email'])
-    base_page.find_element(AuthLocators.PASSWORD_INPUT).send_keys(user['password'])
-    
-    login_button = base_page.find_element(AuthLocators.LOGIN_BUTTON)
-    base_page.safe_click(login_button)
-    
-    base_page.wait_for_url(CONSTRUCTOR_URL)
+    auth_page.wait_for_url(CONSTRUCTOR_URL)
     
     yield user
     
     browser.delete_all_cookies()
-
-    
